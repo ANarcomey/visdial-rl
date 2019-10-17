@@ -263,6 +263,49 @@ def maskedNll(seq, gtSeq, returnScores=False):
     return nll_loss
 
 
+def maskedNll_byCategory(seq, gtSeq, category_mask, round, returnScores=False):
+    '''
+    Compute the NLL loss of ground truth (target) sentence given the
+    model. Assumes that gtSeq has <START> and <END> token surrounding
+    every sequence and gtSeq is left aligned (i.e. right padded)
+
+    S: <START>, E: <END>, W: word token, 0: padding token, P(*): logProb
+
+        gtSeq:
+            [ S     W1    W2  E   0   0]
+        Teacher forced logProbs (seq):
+            [P(W1) P(W2) P(E) -   -   -]
+        Required gtSeq (target):
+            [  W1    W2    E  0   0   0]
+        Mask (non-zero tokens in target):
+            [  1     1     1  0   0   0]
+    '''
+    # Shifting gtSeq 1 token left to remove <START>
+    padColumn = gtSeq.data.new(gtSeq.size(0), 1).fill_(0)
+    padColumn = Variable(padColumn)
+    target = torch.cat([gtSeq, padColumn], dim=1)[:, 1:]
+
+    # Generate a mask of non-padding (non-zero) tokens
+    mask = target.data.gt(0)
+    #import pdb;pdb.set_trace()
+    if category_mask:
+        for b_idx, category_mask_b in enumerate(category_mask):
+            if round not in category_mask_b: mask[b_idx] = 0 
+
+    loss = 0
+    if isinstance(gtSeq, Variable):
+        mask = Variable(mask, volatile=gtSeq.volatile)
+    assert isinstance(target, Variable)
+    gtLogProbs = torch.gather(seq, 2, target.unsqueeze(2)).squeeze(2)
+    # Mean sentence probs:
+    # gtLogProbs = gtLogProbs/(mask.float().sum(1).view(-1,1))
+    if returnScores:
+        return (gtLogProbs * (mask.float())).sum(1)
+    maskedLL = torch.masked_select(gtLogProbs, mask)
+    nll_loss = -torch.sum(maskedLL) / seq.size(0)
+    return nll_loss
+
+
 def concatPaddedSequences(seq1, seqLens1, seq2, seqLens2, padding='right'):
     '''
     Concates two input sequences of shape (batchSize, seqLength). The

@@ -79,7 +79,8 @@ class VisDialDataset(Dataset):
             'img_pos_%s': '%s_img_pos',
             'opt_%s': '%s_opt',
             'opt_length_%s': '%s_opt_len',
-            'opt_list_%s': '%s_opt_list'
+            'opt_list_%s': '%s_opt_list',
+            'conv_id_%s': '%s_conv_id'
         }
 
         # Processing every split in subsets
@@ -103,11 +104,10 @@ class VisDialDataset(Dataset):
                 print('Reading image features...')
                 imgFeats = np.array(imgFile['images_' + dtype])
 
-                if not self.imgNorm:
-                    continue
-                # normalize, if needed
-                print('Normalizing image features..')
-                imgFeats = normalize(imgFeats, axis=1, norm='l2')
+                if self.imgNorm:
+                    # normalize, if needed
+                    print('Normalizing image features..')
+                    imgFeats = normalize(imgFeats, axis=1, norm='l2')
 
                 # save img features
                 self.data['%s_img_fv' % dtype] = torch.FloatTensor(imgFeats)
@@ -182,7 +182,8 @@ class VisDialDataset(Dataset):
         if self.useAnswer:
             self.processSequence(dtype, stype='ans')
             # 1 indexed to 0 indexed
-            self.data[dtype + '_ans_ind'] -= 1
+            if dtype + '_ans_ind' in self.data:
+                self.data[dtype + '_ans_ind'] -= 1
         if self.useQuestion:
             self.processSequence(dtype, stype='ques')
 
@@ -211,8 +212,8 @@ class VisDialDataset(Dataset):
             for rId in range(numRounds):
                 length = seqLen[thId, rId]
                 if length == 0:
-                    print('Warning: Skipping empty %s sequence at (%d, %d)'\
-                          %(stype, thId, rId))
+                    #print('Warning: Skipping empty %s sequence at (%d, %d)'\
+                    #      %(stype, thId, rId))
                     continue
 
                 sequence[thId, rId, 1:length + 1] = seq[thId, rId, :length]
@@ -303,6 +304,8 @@ class VisDialDataset(Dataset):
             elif key == 'cap_len':
                 # 'cap_lens' are single integers, need special treatment
                 out[key] = torch.LongTensor(mergedBatch[key])
+            elif key == 'conv_id':
+                out[key] = torch.LongTensor(mergedBatch[key])
             else:
                 out[key] = torch.stack(mergedBatch[key], 0)
 
@@ -355,8 +358,7 @@ class VisDialDataset(Dataset):
 
         if self.useOptions:
             optInds = self.data[dtype + '_opt'][idx]
-            ansId = self.data[dtype + '_ans_ind'][idx]
-
+    
             optSize = list(optInds.size())
             newSize = torch.Size(optSize + [-1])
 
@@ -368,7 +370,10 @@ class VisDialDataset(Dataset):
 
             item['opt'] = opts.view(newSize)
             item['opt_len'] = optLens
-            item['ans_id'] = ansId
+
+            if dtype != 'test':
+                ansId = self.data[dtype + '_ans_ind'][idx]
+                item['ans_id'] = ansId
 
         # if image needed
         if self.useIm:
@@ -376,5 +381,7 @@ class VisDialDataset(Dataset):
             # item['img_fname'] = self.data[dtype + '_img_fnames'][idx]
             if dtype + '_img_labels' in self.data:
                 item['img_label'] = self.data[dtype + '_img_labels'][idx]
+
+        item['conv_id'] = self.data[dtype + '_conv_id'][idx]
 
         return item

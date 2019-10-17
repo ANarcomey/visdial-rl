@@ -6,6 +6,8 @@ from six.moves import range
 from markdown2 import markdown
 from time import gmtime, strftime
 from timeit import default_timer as timer
+import json
+
 
 import torch
 import torch.nn as nn
@@ -19,6 +21,10 @@ from eval_utils.rank_answerer import rankABot
 from eval_utils.rank_questioner import rankQBot
 from utils import utilities as utils
 from utils.visualize import VisdomVisualize
+
+#from pympler.tracker import SummaryTracker
+#tracker = SummaryTracker()
+#import pdb;pdb.set_trace()
 
 #---------------------------------------------------------------------------------------
 # Setup
@@ -35,6 +41,7 @@ if params['useGPU']:
 
 # Setup dataloader
 splits = ['train', 'val', 'test']
+#import pdb;pdb.set_trace()
 
 dataset = VisDialDataset(params, splits)
 
@@ -46,6 +53,8 @@ for key in transfer:
 
 # Create save path and checkpoints folder
 os.makedirs('checkpoints', exist_ok=True)
+while os.path.exists(params['savePath']):
+    params['savePath'] += '_duplicate'
 os.mkdir(params['savePath'])
 
 # Loading Modules
@@ -82,6 +91,11 @@ dataloader = DataLoader(
     drop_last=True,
     collate_fn=dataset.collate_fn,
     pin_memory=False)
+
+# Load category specification
+if params['qaCategory'] and params['categoryMap']:
+    category_mapping = json.load(open(params['categoryMap'],'r'))
+    category_mapping_train = category_mapping['train'][params['qaCategory']]
 
 # Initializing visdom environment for plotting data
 viz = VisdomVisualize(
@@ -155,6 +169,7 @@ for epochId, idx, batch in batch_iter(dataloader):
     options = Variable(batch['opt'], requires_grad=False)
     optionLens = Variable(batch['opt_len'], requires_grad=False)
     gtAnsId = Variable(batch['ans_id'], requires_grad=False)
+    convId = Variable(batch['conv_id'], requires_grad=False)
 
     # Initializing optimizer and losses
     optimizer.zero_grad()
@@ -184,6 +199,17 @@ for epochId, idx, batch in batch_iter(dataloader):
         prevFeatDist = mse_criterion(initialGuess, image)
         featLoss += torch.mean(prevFeatDist)
         prevFeatDist = torch.mean(prevFeatDist,1)
+
+    # Get conversation category mapping for the batch
+    if params['qaCategory'] and params['categoryMap']:
+        category_mapping_conv = [category_mapping_train.get(batched_convId,[]) for batched_convId in convId.data]
+        entire_batch_empty = True
+        for category_rounds in category_mapping_conv:
+            if len(category_rounds) > 0: entire_batch_empty = False
+        if entire_batch_empty: continue
+    else:
+        category_mapping_conv = None
+
 
     # Iterating over dialog rounds
     for round in range(numRounds):
@@ -217,6 +243,8 @@ for epochId, idx, batch in batch_iter(dataloader):
         '''
         # Tracking components which require a forward pass
         # A-Bot dialog model
+
+
         forwardABot = (params['trainMode'] == 'sl-abot'
                        or (params['trainMode'] == 'rl-full-QAf'
                            and round < rlRound))
@@ -226,6 +254,12 @@ for epochId, idx, batch in batch_iter(dataloader):
                            and round < rlRound))
         # Q-Bot feature regression network
         forwardFeatNet = (forwardQBot or params['trainMode'] == 'rl-full-QAf')
+
+        def print_sequence(seq):
+            for b_idx, s in enumerate(seq):
+                print("\ndialog {} of the batch:".format(b_idx))
+                sentence = " ".join([dataset.ind2word[ind] for ind in s])
+                print(sentence)
 
         # Answerer Forward Pass
         if forwardABot:
@@ -241,8 +275,9 @@ for epochId, idx, batch in batch_iter(dataloader):
                 ansLens=gtAnsLens[:, round])
             ansLogProbs = aBot.forward()
             # Cross Entropy (CE) Loss for Ground Truth Answers
-            aBotLoss += utils.maskedNll(ansLogProbs,
-                                        gtAnswers[:, round].contiguous())
+            aBotLoss += utils.maskedNll_byCategory(ansLogProbs,
+                                        gtAnswers[:, round].contiguous(),
+                                        category_mapping_conv, round)
 
         # Questioner Forward Pass (dialog model)
         if forwardQBot:
@@ -253,8 +288,9 @@ for epochId, idx, batch in batch_iter(dataloader):
                 quesLens=gtQuesLens[:, round])
             quesLogProbs = qBot.forward()
             # Cross Entropy (CE) Loss for Ground Truth Questions
-            qBotLoss += utils.maskedNll(quesLogProbs,
-                                        gtQuestions[:, round].contiguous())
+            qBotLoss += utils.maskedNll_byCategory(quesLogProbs,
+                                        gtQuestions[:, round].contiguous(),
+                                        category_mapping_conv, round)
             # Observe GT answer for updating dialog history
             qBot.observe(
                 round,
