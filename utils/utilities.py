@@ -9,7 +9,6 @@ from torch.nn.utils.rnn import pack_padded_sequence
 
 from six import iteritems
 
-
 # Initializing weights
 def initializeWeights(root, itype='xavier'):
     assert itype == 'xavier', 'Only Xavier initialization supported'

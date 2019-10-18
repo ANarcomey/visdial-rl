@@ -4,10 +4,12 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+.env/
 build/
 
 # Checkpoints directory
 checkpoints
+checkpoints_completed
 
 # Dialog output dumps
 dialog_output/results

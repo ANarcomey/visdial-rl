@@ -225,6 +225,13 @@ class Encoder(nn.Module):
             currIns.append(self.questionRNNStates[histIdx][0])
         if self.useIm == 'late':
             currIns.append(self.imageEmbed)
+        #print("isAnswerer =", self.isAnswerer)
+        #print("use im = ", self.useIm)
+        #print("fact embeds[hist] = ", self.factEmbeds[histIdx])
+        #print("fact embeds shape = ", currIns[0].shape)
+        #print("im embed/rnn state shape = ", currIns[1].shape)
+        #print("im embed? shape = ", currIns[2].shape)
+
         hist_t = torch.cat(currIns, -1)
         self.dialogRNNInputs.append(hist_t)
 
