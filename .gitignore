@@ -10,6 +10,7 @@ build/
 # Checkpoints directory
 checkpoints
 checkpoints_completed
+checkpoints_eval
 
 # Dialog output dumps
 dialog_output/results

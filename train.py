@@ -7,6 +7,7 @@ from markdown2 import markdown
 from time import gmtime, strftime
 from timeit import default_timer as timer
 import json
+import logging
 
 import torch
 import torch.nn as nn
@@ -40,8 +41,6 @@ if params['useGPU']:
 
 # Setup dataloader
 splits = ['train', 'val', 'test']
-#import pdb;pdb.set_trace()
-
 dataset = VisDialDataset(params, splits)
 
 # Params to transfer from dataset
@@ -52,9 +51,21 @@ for key in transfer:
 
 # Create save path and checkpoints folder
 os.makedirs('checkpoints', exist_ok=True)
-while os.path.exists(params['savePath']):
-    params['savePath'] += '_duplicate'
+#while os.path.exists(params['savePath']):
+#    params['savePath'] += '_duplicate'
 os.mkdir(params['savePath'])
+
+# Config logging
+log_format = '%(levelname)-8s %(message)s'
+logfile = os.path.join(params['savePath'], 'train.log')
+logging.basicConfig(filename=logfile, level=logging.INFO, format=log_format)
+logging.getLogger().addHandler(logging.StreamHandler())
+logging.info(json.dumps(params))
+
+# +1 - greater the better
+# -1 - lower the better
+metric_trends = {'r1':1, 'r5':1,'r10':1,'mean':-1,'mrr':-1,'logProbsMean':1}
+metrics_by_epoch = {}
 
 # Loading Modules
 parameters = []
@@ -205,7 +216,7 @@ for epochId, idx, batch in batch_iter(dataloader):
         entire_batch_empty = True
         for category_rounds in category_mapping_conv:
             if len(category_rounds) > 0: entire_batch_empty = False
-        if entire_batch_empty: continue
+        if entire_batch_empty: continue #print("skipping batch {}".format(idx)); continue
     else:
         category_mapping_conv = None
 
@@ -397,6 +408,7 @@ for epochId, idx, batch in batch_iter(dataloader):
 
     # Evaluate every epoch
     if iterId % (numIterPerEpoch // 1) == 0:
+        import pdb; pdb.set_trace()
         # Keeping track of epochID
         curEpoch = float(iterId) / numIterPerEpoch
         epochId = (1.0 * iterId / numIterPerEpoch) + 1
@@ -413,6 +425,8 @@ for epochId, idx, batch in batch_iter(dataloader):
 
         # Mapping iteration count to epoch count
         viz.linePlot(iterId, epochId, 'iter x epoch', 'epochs')
+        logging.info("======================================================")
+        logging.info("Epoch {}, iter {}".format(epochId, iterId))
 
         print('Performing validation...')
         if aBot and 'ques' in batch:
@@ -424,11 +438,33 @@ for epochId, idx, batch in batch_iter(dataloader):
                 dataset,
                 'val',
                 scoringFunction=utils.maskedNll,
-                exampleLimit=25 * params['batchSize'])
+                #exampleLimit=25 * params['batchSize'])
+                exampleLimit=None)
 
             for metric, value in rankMetrics.items():
                 viz.linePlot(
                     epochId, value, 'val - aBot', metric, xlabel='Epochs')
+
+            metrics_by_epoch[epochId] = rankMetrics
+            best_epoch_by_metric = {}
+            metrics_by_name = {}
+            for metric_name, trend in metric_trends.items():
+                metric_values = [(values[metric_name], metric_epochId) for metric_epochId, values in metrics_by_epoch.items()]
+                if trend == -1:
+                    best_value, best_value_epoch = min(metric_values)
+                elif trend == 1:
+                    best_value, best_value_epoch = max(metric_values)
+                else:
+                    raise ValueError("Invalid trend of {} for metric {}".format(trend, metric_name))
+                metrics_by_name[metric_name] = [{'epoch':metric_epochId, 'value':value} for value,metric_epochId in metric_values]
+                best_epoch_by_metric[metric_name] = {'epoch':best_value_epoch, 'value':best_value}
+
+            json.dump(metrics_by_epoch, open(os.path.join(params['savePath'], 'metrics_by_epoch.json'),'w'))  
+            logging.info("validation metrics for this epoch: \n{}".format(rankMetrics))
+            logging.info("validation metric history arranged by metric name: \n{}".format(metrics_by_name))
+            logging.info("validation metric best epoch by metric: \n{}".format(best_epoch_by_metric))
+
+
 
             if 'logProbsMean' in rankMetrics:
                 logProbsMean = params['CELossCoeff'] * rankMetrics[

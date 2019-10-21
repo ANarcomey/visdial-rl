@@ -6,6 +6,8 @@ from six.moves import range
 from markdown2 import markdown
 from time import gmtime, strftime
 from timeit import default_timer as timer
+import logging
+import json
 
 import torch
 import torch.nn as nn
@@ -16,7 +18,7 @@ import options
 from dataloader import VisDialDataset
 from torch.utils.data import DataLoader
 from eval_utils.dialog_generate import dialogDump
-from eval_utils.rank_answerer import rankABot
+from eval_utils.rank_answerer import rankABot, rankABot_category_specific
 from eval_utils.rank_questioner import rankQBot, rankQABots
 from utils import utilities as utils
 from utils.visualize import VisdomVisualize
@@ -36,7 +38,7 @@ dlparams = params.copy()
 dlparams['useIm'] = True
 dlparams['useHistory'] = True
 dlparams['numRounds'] = 10
-splits = ['val', 'test']
+splits = ['val']#['val', 'test']
 
 dataset = VisDialDataset(dlparams, splits)
 
@@ -48,6 +50,17 @@ for key in transfer:
 
 if 'numRounds' not in params:
     params['numRounds'] = 10
+
+# Create save path and checkpoints folder
+os.makedirs('checkpoints_eval', exist_ok=True)
+os.mkdir(params['savePath'])
+
+# Config logging
+log_format = '%(levelname)-8s %(message)s'
+logfile = os.path.join(params['savePath'], 'eval.log')
+logging.basicConfig(filename=logfile, level=logging.INFO, format=log_format)
+logging.getLogger().addHandler(logging.StreamHandler())
+logging.info(json.dumps(params))
 
 # Always load checkpoint parameters with continue flag
 params['continue'] = True
@@ -112,12 +125,29 @@ dataset.split = split
 
 # if params['evalModeList'] == 'ABotRank':
 if 'ABotRank' in params['evalModeList']:
-    print("Performing ABotRank evaluation")
+    #print("Performing ABotRank evaluation")
+    logging.info("Performing ABotRank evaluation on split {}".format(split))
+
+    if params['qaCategory'] and params['categoryMap']:
+        logging.info("Evaluating only on rounds in the category \"{}\"".format(params['qaCategory']))
+        rankMetrics_category = rankABot_category_specific(
+            aBot, dataset, split, utils.maskedNll, params['categoryMap'], params['qaCategory'])
+        #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+        for metric, value in rankMetrics_category.items():
+            plotName = splitName + ' - ABot Rank'
+            viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+            logging.info("Metric \"{}\": {}".format(metric, value))
+
+
+    logging.info("Evaluating on complete dataset, no category specification")
     rankMetrics = rankABot(
         aBot, dataset, split, scoringFunction=utils.maskedNll)
+    #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
     for metric, value in rankMetrics.items():
         plotName = splitName + ' - ABot Rank'
         viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+        logging.info("Metric \"{}\": {}".format(metric, value))
+
 
 # if params['evalModeList'] == 'QBotRank':
 if 'QBotRank' in params['evalModeList']:
