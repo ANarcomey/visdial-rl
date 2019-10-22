@@ -8,6 +8,7 @@ from time import gmtime, strftime
 from timeit import default_timer as timer
 import json
 import logging
+import shutil
 
 import torch
 import torch.nn as nn
@@ -53,6 +54,8 @@ for key in transfer:
 os.makedirs('checkpoints', exist_ok=True)
 #while os.path.exists(params['savePath']):
 #    params['savePath'] += '_duplicate'
+if params['clobberSave'] and os.path.exists(params['savePath']):
+    shutil.rmtree(params['savePath'])
 os.mkdir(params['savePath'])
 
 # Config logging
@@ -158,6 +161,8 @@ def batch_iter(dataloader):
 
 
 start_t = timer()
+num_batches_processed = 0
+num_batches_processed_epoch = 0
 for epochId, idx, batch in batch_iter(dataloader):
     # Keeping track of iterId and epoch
     iterId = startIterID + idx + (epochId * numIterPerEpoch)
@@ -217,6 +222,9 @@ for epochId, idx, batch in batch_iter(dataloader):
         for category_rounds in category_mapping_conv:
             if len(category_rounds) > 0: entire_batch_empty = False
         if entire_batch_empty: continue #print("skipping batch {}".format(idx)); continue
+        num_batches_processed += 1
+        num_batches_processed_epoch += 1
+
     else:
         category_mapping_conv = None
 
@@ -406,9 +414,9 @@ for epochId, idx, batch in batch_iter(dataloader):
         viz.linePlot(iterId, loss.data[0], 'loss', 'train loss')
         viz.linePlot(iterId, runningLoss, 'loss', 'running train loss')
 
+
     # Evaluate every epoch
-    if iterId % (numIterPerEpoch // 1) == 0:
-        import pdb; pdb.set_trace()
+    if iterId % (numIterPerEpoch // 1) == 0 and iterId != 0:
         # Keeping track of epochID
         curEpoch = float(iterId) / numIterPerEpoch
         epochId = (1.0 * iterId / numIterPerEpoch) + 1
@@ -427,6 +435,10 @@ for epochId, idx, batch in batch_iter(dataloader):
         viz.linePlot(iterId, epochId, 'iter x epoch', 'epochs')
         logging.info("======================================================")
         logging.info("Epoch {}, iter {}".format(epochId, iterId))
+        logging.info("Cummulative Num batches processed: {}".format(num_batches_processed))
+        logging.info("Num batches processed this epoch: {}".format(num_batches_processed_epoch))
+        num_batches_processed_epoch = 0
+
 
         print('Performing validation...')
         if aBot and 'ques' in batch:
@@ -502,7 +514,7 @@ for epochId, idx, batch in batch_iter(dataloader):
                     viz.linePlot(iterId, valLoss, 'loss', 'val loss')
 
     # Save the model after every epoch
-    if iterId % numIterPerEpoch == 0:
+    #if iterId % numIterPerEpoch == 0 and iterId != 0:
         params['ckpt_iterid'] = iterId
         params['ckpt_lRate'] = lRate
 

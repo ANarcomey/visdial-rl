@@ -32,6 +32,8 @@ def readCommandLine(argv=None):
                             help='Path to save checkpoints')
     parser.add_argument('-saveName', default='',
                             help='Name of save directory within savePath')
+    parser.add_argument('-clobberSave', action='store_true',
+                            help='Enables clobbering of previous entry in savePath/saveName')
     parser.add_argument('-startFrom', type=str, default='',
                             help='Copy weights from model at this path')
     parser.add_argument('-qstartFrom', type=str, default='',
