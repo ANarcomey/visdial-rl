@@ -7,8 +7,9 @@ from time import gmtime, strftime
 def readCommandLine(argv=None):
     parser = argparse.ArgumentParser(description='Train and Test the Visual Dialog model')
 
-    parser.add_argument('-qaCategory', type=str, help='Category of QA pairs to train model.')
+    parser.add_argument('-qaCategory', type=str, help='Category of QA pairs to train model.') #rename to filter category
     parser.add_argument('-categoryMap', type=str, help='JSON file with mapping of dialog rounds to category.')
+    parser.add_argument('-descr', type=str, help='Short description of the model and evaluation mode.')
 
     #-------------------------------------------------------------------------
     # Data input settings

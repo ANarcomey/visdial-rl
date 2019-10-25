@@ -8,6 +8,7 @@ from time import gmtime, strftime
 from timeit import default_timer as timer
 import logging
 import json
+import shutil
 
 import torch
 import torch.nn as nn
@@ -18,7 +19,7 @@ import options
 from dataloader import VisDialDataset
 from torch.utils.data import DataLoader
 from eval_utils.dialog_generate import dialogDump
-from eval_utils.rank_answerer import rankABot, rankABot_category_specific
+from eval_utils.rank_answerer import rankABot, rankABot_category_specific, rankABot_category_specific_batchless
 from eval_utils.rank_questioner import rankQBot, rankQABots
 from utils import utilities as utils
 from utils.visualize import VisdomVisualize
@@ -53,24 +54,37 @@ if 'numRounds' not in params:
 
 # Create save path and checkpoints folder
 os.makedirs('checkpoints_eval', exist_ok=True)
-os.mkdir(params['savePath'])
+if params['clobberSave'] and os.path.exists(params['savePath']):
+    shutil.rmtree(params['savePath'])
+os.makedirs(params['savePath'])
 
 # Config logging
 log_format = '%(levelname)-8s %(message)s'
 logfile = os.path.join(params['savePath'], 'eval.log')
 logging.basicConfig(filename=logfile, level=logging.INFO, format=log_format)
 logging.getLogger().addHandler(logging.StreamHandler())
+if params['descr']:
+    logging.info('='*80)
+    logging.info('DESCRIPTION: '+ params['descr'])
+    logging.info('='*80)
+
+logging.info('='*80)
+logging.info('PARAMS:')
 logging.info(json.dumps(params))
+logging.info('='*80)
+
 
 # Always load checkpoint parameters with continue flag
 params['continue'] = True
 
 excludeParams = ['batchSize', 'visdomEnv', 'startFrom', 'qstartFrom', 'trainMode', \
     'evalModeList', 'inputImg', 'inputQues', 'inputJson', 'evalTitle', 'beamSize', \
-    'enableVisdom', 'visdomServer', 'visdomServerPort']
+    'enableVisdom', 'visdomServer', 'visdomServerPort', \
+    'qaCategory','categoryMap']
 
 aBot = None
 qBot = None
+#import pdb;pdb.set_trace()
 
 # load aBot
 if params['startFrom']:
@@ -137,16 +151,15 @@ if 'ABotRank' in params['evalModeList']:
             plotName = splitName + ' - ABot Rank'
             viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
             logging.info("Metric \"{}\": {}".format(metric, value))
-
-
-    logging.info("Evaluating on complete dataset, no category specification")
-    rankMetrics = rankABot(
-        aBot, dataset, split, scoringFunction=utils.maskedNll)
-    #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
-    for metric, value in rankMetrics.items():
-        plotName = splitName + ' - ABot Rank'
-        viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
-        logging.info("Metric \"{}\": {}".format(metric, value))
+    else:
+        logging.info("Evaluating on complete dataset, no category specification")
+        rankMetrics = rankABot(
+            aBot, dataset, split, scoringFunction=utils.maskedNll)
+        #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+        for metric, value in rankMetrics.items():
+            plotName = splitName + ' - ABot Rank'
+            viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+            logging.info("Metric \"{}\": {}".format(metric, value))
 
 
 # if params['evalModeList'] == 'QBotRank':

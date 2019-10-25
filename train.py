@@ -56,14 +56,22 @@ os.makedirs('checkpoints', exist_ok=True)
 #    params['savePath'] += '_duplicate'
 if params['clobberSave'] and os.path.exists(params['savePath']):
     shutil.rmtree(params['savePath'])
-os.mkdir(params['savePath'])
+os.makedirs(params['savePath'])
 
 # Config logging
 log_format = '%(levelname)-8s %(message)s'
 logfile = os.path.join(params['savePath'], 'train.log')
 logging.basicConfig(filename=logfile, level=logging.INFO, format=log_format)
 logging.getLogger().addHandler(logging.StreamHandler())
+if params['descr']:
+    logging.info('='*80)
+    logging.info('DESCRIPTION: '+ params['descr'])
+    logging.info('='*80)
+
+logging.info('='*80)
+logging.info('PARAMS:')
 logging.info(json.dumps(params))
+logging.info('='*80)
 
 # +1 - greater the better
 # -1 - lower the better
@@ -104,6 +112,12 @@ dataloader = DataLoader(
     drop_last=True,
     collate_fn=dataset.collate_fn,
     pin_memory=False)
+
+def print_sequence(seq):
+    for b_idx, s in enumerate(seq):
+        print("\ndialog {} of the batch:".format(b_idx))
+        sentence = " ".join([dataset.ind2word[ind] for ind in s])
+        print(sentence)
 
 # Load category specification
 if params['qaCategory'] and params['categoryMap']:
@@ -163,6 +177,7 @@ def batch_iter(dataloader):
 start_t = timer()
 num_batches_processed = 0
 num_batches_processed_epoch = 0
+#import pdb;pdb.set_trace()
 for epochId, idx, batch in batch_iter(dataloader):
     # Keeping track of iterId and epoch
     iterId = startIterID + idx + (epochId * numIterPerEpoch)
@@ -217,7 +232,7 @@ for epochId, idx, batch in batch_iter(dataloader):
 
     # Get conversation category mapping for the batch
     if params['qaCategory'] and params['categoryMap']:
-        category_mapping_conv = [category_mapping_train.get(batched_convId,[]) for batched_convId in convId.data]
+        category_mapping_conv = [category_mapping_train.get(str(batched_convId),[]) for batched_convId in convId.data]
         entire_batch_empty = True
         for category_rounds in category_mapping_conv:
             if len(category_rounds) > 0: entire_batch_empty = False
@@ -273,14 +288,9 @@ for epochId, idx, batch in batch_iter(dataloader):
         # Q-Bot feature regression network
         forwardFeatNet = (forwardQBot or params['trainMode'] == 'rl-full-QAf')
 
-        def print_sequence(seq):
-            for b_idx, s in enumerate(seq):
-                print("\ndialog {} of the batch:".format(b_idx))
-                sentence = " ".join([dataset.ind2word[ind] for ind in s])
-                print(sentence)
-
         # Answerer Forward Pass
         if forwardABot:
+            #import pdb;pdb.set_trace()
             # Observe Ground Truth (GT) question
             aBot.observe(
                 round,

@@ -17,6 +17,7 @@ dialog_output/results
 
 # IPython Notebook
 .ipynb_checkpoints
+“”/
 
 # virtualenv
 venv/
