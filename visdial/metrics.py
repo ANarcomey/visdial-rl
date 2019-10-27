@@ -31,9 +31,12 @@ def evaluateMetric(ranks, metric):
         return (1 / ranks).mean()
 
 
-def computeMetrics(ranks):
-    results = {metric: evaluateMetric(ranks, metric) for metric in metricList}
-    # pretty print metrics
-    # print('\n')
-    # for metric in metricList: print('\t%s : %.3f' % (metric, results[metric]))
+def computeMetrics(ranks, asFloat=False):
+    if asFloat:
+        results = {metric: 1.*evaluateMetric(ranks, metric) for metric in metricList}
+    else:
+        results = {metric: evaluateMetric(ranks, metric) for metric in metricList}
+        # pretty print metrics
+        # print('\n')
+        # for metric in metricList: print('\t%s : %.3f' % (metric, results[metric]))
     return results

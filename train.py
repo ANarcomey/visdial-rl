@@ -18,7 +18,7 @@ from torch.autograd import Variable
 import options
 from dataloader import VisDialDataset
 from torch.utils.data import DataLoader
-from eval_utils.rank_answerer import rankABot
+from eval_utils.rank_answerer import rankABot, rankABot_category_specific
 from eval_utils.rank_questioner import rankQBot
 from utils import utilities as utils
 from utils.visualize import VisdomVisualize
@@ -450,18 +450,75 @@ for epochId, idx, batch in batch_iter(dataloader):
         num_batches_processed_epoch = 0
 
 
-        print('Performing validation...')
+        logging.info('Performing validation...')
         if aBot and 'ques' in batch:
-            print("aBot Validation:")
+            logging.info("aBot Validation:")
 
             # NOTE: A-Bot validation is slow, so adjust exampleLimit as needed
+            
+            '''
+            import pdb;pdb.set_trace()
             rankMetrics = rankABot(
                 aBot,
                 dataset,
                 'val',
                 scoringFunction=utils.maskedNll,
                 #exampleLimit=25 * params['batchSize'])
+                #exampleLimit=None)
                 exampleLimit=None)
+
+            rankMetrics2 = rankABot_category_specific_batchless(
+                aBot,
+                dataset,
+                'val',
+                params['categoryMap'],
+                params['qaCategory'],
+                scoringFunction=utils.maskedNll,
+                exampleLimit=params['batchSize'])
+
+            rankMetrics3 = rankABot_category_specific(
+                aBot,
+                dataset,
+                'val',
+                params['categoryMap'],
+                params['qaCategory'],
+                scoringFunction=utils.maskedNll,
+                exampleLimit=None)
+
+            rankMetrics4 = rankABot_category_specific_v2(
+                aBot,
+                dataset,
+                'val',
+                params['categoryMap'],
+                params['qaCategory'],
+                scoringFunction=utils.maskedNll_byCategory,
+                exampleLimit=params['batchSize'])
+            '''
+
+
+        
+            if params['qaCategory'] and params['categoryMap']:
+                logging.info("Performing category-filtered validation on val data.")
+                rankMetrics_category_filter = rankABot_category_specific(
+                    aBot,
+                    dataset,
+                    'val',
+                    params['categoryMap'],
+                    params['qaCategory'],
+                    scoringFunction=utils.maskedNll,
+                    exampleLimit=None)
+                    #exampleLimit=params['batchSize'])
+                rankMetrics = rankMetrics_category_filter
+            else:
+                logging.info("Performing validation on val data, no category filtering at this stage.")
+                rankMetrics_no_filter = rankABot(
+                    aBot,
+                    dataset,
+                    'val',
+                    scoringFunction=utils.maskedNll,
+                    exampleLimit=None)
+                    #exampleLimit=params['batchSize'])
+                rankMetrics = rankMetrics_no_filter
 
             for metric, value in rankMetrics.items():
                 viz.linePlot(
@@ -485,7 +542,6 @@ for epochId, idx, batch in batch_iter(dataloader):
             logging.info("validation metrics for this epoch: \n{}".format(rankMetrics))
             logging.info("validation metric history arranged by metric name: \n{}".format(metrics_by_name))
             logging.info("validation metric best epoch by metric: \n{}".format(best_epoch_by_metric))
-
 
 
             if 'logProbsMean' in rankMetrics:
@@ -524,7 +580,6 @@ for epochId, idx, batch in batch_iter(dataloader):
                     viz.linePlot(iterId, valLoss, 'loss', 'val loss')
 
     # Save the model after every epoch
-    #if iterId % numIterPerEpoch == 0 and iterId != 0:
         params['ckpt_iterid'] = iterId
         params['ckpt_lRate'] = lRate
 

@@ -101,7 +101,7 @@ class Answerer(Agent):
             beamSize=beamSize)
         return answers, ansLens
 
-    def evalOptions(self, options, optionLens, scoringFunction):
+    def evalOptions(self, options, optionLens, scoringFunction, **kwargs):
         '''
         Given the current state (question and conversation history), evaluate
         a set of candidate answers to the question.
@@ -111,7 +111,7 @@ class Answerer(Agent):
         '''
         states = self.encoder()
         return self.decoder.evalOptions(states, options, optionLens,
-                                        scoringFunction)
+                                        scoringFunction, **kwargs)
 
     def reinforce(self, reward):
         # Propogate reinforce function call to decoder

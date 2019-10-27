@@ -194,7 +194,7 @@ class Decoder(nn.Module):
         samples = torch.cat(gen_samples, 1)
         return samples, sampleLens
 
-    def evalOptions(self, encStates, options, optionLens, scoringFunction):
+    def evalOptions(self, encStates, options, optionLens, scoringFunction, category_mapping_conv=None, round=None):
         '''
         Forward pass a set of candidate options to get log probabilities
 
@@ -221,7 +221,11 @@ class Decoder(nn.Module):
                         for x in encStates]
 
         logProbs = self.forward(encStates, inputSeq=optionsFlat)
-        scores = scoringFunction(logProbs, optionsFlat, returnScores=True)
+        if category_mapping_conv:
+            #import pdb;pdb.set_trace()
+            scores = scoringFunction(logProbs, optionsFlat, category_mapping_conv, round, returnScores=True, numFlattenedPerBatch=numOptions)
+        else:
+            scores = scoringFunction(logProbs, optionsFlat, returnScores=True)
         return scores.view(batchSize, numOptions)
 
     def reinforce(self, reward):

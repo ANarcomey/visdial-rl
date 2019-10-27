@@ -262,7 +262,7 @@ def maskedNll(seq, gtSeq, returnScores=False):
     return nll_loss
 
 
-def maskedNll_byCategory(seq, gtSeq, category_mask, round, returnScores=False):
+def maskedNll_byCategory(seq, gtSeq, category_mask, round, returnScores=False, numFlattenedPerBatch=None):
     '''
     Compute the NLL loss of ground truth (target) sentence given the
     model. Assumes that gtSeq has <START> and <END> token surrounding
@@ -289,7 +289,11 @@ def maskedNll_byCategory(seq, gtSeq, category_mask, round, returnScores=False):
     #import pdb;pdb.set_trace()
     if category_mask:
         for b_idx, category_mask_b in enumerate(category_mask):
-            if round not in category_mask_b: mask[b_idx] = 0 
+            if round not in category_mask_b:
+                if numFlattenedPerBatch:
+                    mask[b_idx*numFlattenedPerBatch:b_idx*numFlattenedPerBatch + numFlattenedPerBatch]
+                else: 
+                    mask[b_idx] = 0 
 
     loss = 0
     if isinstance(gtSeq, Variable):
