@@ -25,7 +25,6 @@ from utils.visualize import VisdomVisualize
 
 #from pympler.tracker import SummaryTracker
 #tracker = SummaryTracker()
-#import pdb;pdb.set_trace()
 
 #---------------------------------------------------------------------------------------
 # Setup
@@ -119,10 +118,16 @@ def print_sequence(seq):
         sentence = " ".join([dataset.ind2word[ind] for ind in s])
         print(sentence)
 
+# Load naming of data splits
+split_names = json.load(open(params['splitNames'],'r'))
+
 # Load category specification
 if params['qaCategory'] and params['categoryMap']:
     category_mapping = json.load(open(params['categoryMap'],'r'))
-    category_mapping_train = category_mapping['train'][params['qaCategory']]
+    train_split_name = split_names['train']
+    val_split_name = split_names['val']
+    category_mapping_train = category_mapping[train_split_name][params['qaCategory']]
+    category_mapping_val = category_mapping[val_split_name][params['qaCategory']]
 
 # Initializing visdom environment for plotting data
 viz = VisdomVisualize(
@@ -177,7 +182,6 @@ def batch_iter(dataloader):
 start_t = timer()
 num_batches_processed = 0
 num_batches_processed_epoch = 0
-#import pdb;pdb.set_trace()
 for epochId, idx, batch in batch_iter(dataloader):
     # Keeping track of iterId and epoch
     iterId = startIterID + idx + (epochId * numIterPerEpoch)
@@ -290,7 +294,6 @@ for epochId, idx, batch in batch_iter(dataloader):
 
         # Answerer Forward Pass
         if forwardABot:
-            #import pdb;pdb.set_trace()
             # Observe Ground Truth (GT) question
             aBot.observe(
                 round,
@@ -496,19 +499,36 @@ for epochId, idx, batch in batch_iter(dataloader):
             '''
 
 
-        
             if params['qaCategory'] and params['categoryMap']:
+                #import pdb;pdb.set_trace()
                 logging.info("Performing category-filtered validation on val data.")
                 rankMetrics_category_filter = rankABot_category_specific(
                     aBot,
                     dataset,
                     'val',
-                    params['categoryMap'],
                     params['qaCategory'],
+                    category_mapping_val,
                     scoringFunction=utils.maskedNll,
                     exampleLimit=None)
                     #exampleLimit=params['batchSize'])
                 rankMetrics = rankMetrics_category_filter
+
+                '''rankMetrics_no_filter = rankABot(
+                    aBot,
+                    dataset,
+                    'val',
+                    scoringFunction=utils.maskedNll,
+                    exampleLimit=None)
+                    #exampleLimit=params['batchSize'])
+
+                rankMetrics_test = rankABot(
+                    aBot,
+                    dataset,
+                    'test',
+                    scoringFunction=utils.maskedNll,
+                    exampleLimit=None)
+                    #exampleLimit=params['batchSize'])'''
+
             else:
                 logging.info("Performing validation on val data, no category filtering at this stage.")
                 rankMetrics_no_filter = rankABot(

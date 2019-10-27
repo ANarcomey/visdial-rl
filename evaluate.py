@@ -111,6 +111,17 @@ if params['qstartFrom']:
 for key in excludeParams:
     params[key] = dlparams[key]
 
+# Load naming of data splits
+split_names = json.load(open(params['splitNames'],'r'))
+
+# Load category specification
+if params['qaCategory'] and params['categoryMap']:
+    category_mapping = json.load(open(params['categoryMap'],'r'))
+    val_split_name = split_names['val']
+    test_split_name = split_names['test']
+    category_mapping_splits = {'val':category_mapping[val_split_name][params['qaCategory']],
+                               'test':category_mapping[test_split_name][params['qaCategory']]}
+
 # Plotting on vizdom
 viz = VisdomVisualize(
     enable=bool(params['enableVisdom']),
@@ -119,7 +130,7 @@ viz = VisdomVisualize(
     port=params['visdomServerPort'])
 pprint.pprint(params)
 viz.addText(pprint.pformat(params, indent=4))
-print("Running evaluation!")
+logging.info("Running evaluation!")
 
 numRounds = params['numRounds']
 if 'ckpt_iterid' in params:
@@ -127,84 +138,87 @@ if 'ckpt_iterid' in params:
 else:
     iterId = -1
 
-if 'test' in splits:
-    split = 'test'
-    splitName = 'test - {}'.format(params['evalTitle'])
-else:
-    split = 'val'
-    splitName = 'full Val - {}'.format(params['evalTitle'])
+#if 'test' in splits:
+#    split = 'test'
+#    splitName = 'test - {}'.format(params['evalTitle'])
+#else:
+#    split = 'val'
+#    splitName = 'full Val - {}'.format(params['evalTitle'])
 
-print("Using split %s" % split)
-dataset.split = split
 
-# if params['evalModeList'] == 'ABotRank':
-if 'ABotRank' in params['evalModeList']:
-    #print("Performing ABotRank evaluation")
-    logging.info("Performing ABotRank evaluation on split {}".format(split))
+for split in splits:
 
-    if params['qaCategory'] and params['categoryMap']:
-        logging.info("Evaluating only on rounds in the category \"{}\"".format(params['qaCategory']))
-        rankMetrics_category = rankABot_category_specific(
-            aBot, dataset, split, utils.maskedNll, params['categoryMap'], params['qaCategory'])
-        #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
-        for metric, value in rankMetrics_category.items():
-            plotName = splitName + ' - ABot Rank'
-            viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
-            logging.info("Metric \"{}\": {}".format(metric, value))
-    else:
-        logging.info("Evaluating on complete dataset, no category specification")
-        rankMetrics = rankABot(
-            aBot, dataset, split, scoringFunction=utils.maskedNll)
-        #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+    logging.info("Using split %s" % split)
+    dataset.split = split
+
+    # if params['evalModeList'] == 'ABotRank':
+    if 'ABotRank' in params['evalModeList']:
+        #print("Performing ABotRank evaluation")
+        logging.info("Performing ABotRank evaluation on split {}".format(split))
+
+        if params['qaCategory'] and params['categoryMap']:
+            logging.info("Evaluating only on rounds in the category \"{}\"".format(params['qaCategory']))
+            rankMetrics_category = rankABot_category_specific(
+                aBot, dataset, split, utils.maskedNll, params['qaCategory'], params['categoryMap'], category_mapping_splits[split])
+            #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+            for metric, value in rankMetrics_category.items():
+                plotName = splitName + ' - ABot Rank'
+                viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+                logging.info("Metric \"{}\": {}".format(metric, value))
+        else:
+            logging.info("Evaluating on complete dataset, no category specification")
+            rankMetrics = rankABot(
+                aBot, dataset, split, scoringFunction=utils.maskedNll)
+            #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+            for metric, value in rankMetrics.items():
+                plotName = splitName + ' - ABot Rank'
+                viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+                logging.info("Metric \"{}\": {}".format(metric, value))
+
+
+    # if params['evalModeList'] == 'QBotRank':
+    if 'QBotRank' in params['evalModeList']:
+        print("Performing QBotRank evaluation")
+        rankMetrics, roundRanks = rankQBot(qBot, dataset, split, verbose=1)
         for metric, value in rankMetrics.items():
-            plotName = splitName + ' - ABot Rank'
+            plotName = splitName + ' - QBot Rank'
             viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
-            logging.info("Metric \"{}\": {}".format(metric, value))
 
+        for r in range(numRounds + 1):
+            for metric, value in roundRanks[r].items():
+                plotName = '[Iter %d] %s - QABots Rank Roundwise' % \
+                            (iterId, splitName)
+                viz.linePlot(r, value, plotName, metric, xlabel='Round')
 
-# if params['evalModeList'] == 'QBotRank':
-if 'QBotRank' in params['evalModeList']:
-    print("Performing QBotRank evaluation")
-    rankMetrics, roundRanks = rankQBot(qBot, dataset, split, verbose=1)
-    for metric, value in rankMetrics.items():
-        plotName = splitName + ' - QBot Rank'
-        viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+    # if params['evalModeList'] == 'QABotsRank':
+    if 'QABotsRank' in params['evalModeList']:
+        print("Performing QABotsRank evaluation")
+        outputPredFile = "data/visdial/visdial/output_predictions_rollout.h5"
+        rankMetrics, roundRanks = rankQABots(
+            qBot, aBot, dataset, split, beamSize=params['beamSize'])
+        for metric, value in rankMetrics.items():
+            plotName = splitName + ' - QABots Rank'
+            viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
 
-    for r in range(numRounds + 1):
-        for metric, value in roundRanks[r].items():
-            plotName = '[Iter %d] %s - QABots Rank Roundwise' % \
-                        (iterId, splitName)
-            viz.linePlot(r, value, plotName, metric, xlabel='Round')
+        for r in range(numRounds + 1):
+            for metric, value in roundRanks[r].items():
+                plotName = '[Iter %d] %s - QBot All Metrics vs Round'%\
+                            (iterId, splitName)
+                viz.linePlot(r, value, plotName, metric, xlabel='Round')
 
-# if params['evalModeList'] == 'QABotsRank':
-if 'QABotsRank' in params['evalModeList']:
-    print("Performing QABotsRank evaluation")
-    outputPredFile = "data/visdial/visdial/output_predictions_rollout.h5"
-    rankMetrics, roundRanks = rankQABots(
-        qBot, aBot, dataset, split, beamSize=params['beamSize'])
-    for metric, value in rankMetrics.items():
-        plotName = splitName + ' - QABots Rank'
-        viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
+    if 'dialog' in params['evalModeList']:
+        print("Performing dialog generation...")
+        split = 'test'
+        outputFolder = "dialog_output/results"
+        os.makedirs(outputFolder, exist_ok=True)
+        outputPath = os.path.join(outputFolder, "results.json")
+        dialogDump(
+            params,
+            dataset,
+            split,
+            aBot=aBot,
+            qBot=qBot,
+            beamSize=params['beamSize'],
+            savePath=outputPath)
 
-    for r in range(numRounds + 1):
-        for metric, value in roundRanks[r].items():
-            plotName = '[Iter %d] %s - QBot All Metrics vs Round'%\
-                        (iterId, splitName)
-            viz.linePlot(r, value, plotName, metric, xlabel='Round')
-
-if 'dialog' in params['evalModeList']:
-    print("Performing dialog generation...")
-    split = 'test'
-    outputFolder = "dialog_output/results"
-    os.makedirs(outputFolder, exist_ok=True)
-    outputPath = os.path.join(outputFolder, "results.json")
-    dialogDump(
-        params,
-        dataset,
-        split,
-        aBot=aBot,
-        qBot=qBot,
-        beamSize=params['beamSize'],
-        savePath=outputPath)
-
-viz.addText("Evaluation run complete!")
+    viz.addText("Evaluation run complete!")

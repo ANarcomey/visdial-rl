@@ -10,6 +10,8 @@ def readCommandLine(argv=None):
     parser.add_argument('-qaCategory', type=str, help='Category of QA pairs to train model.') #rename to filter category
     parser.add_argument('-categoryMap', type=str, help='JSON file with mapping of dialog rounds to category.')
     parser.add_argument('-descr', type=str, help='Short description of the model and evaluation mode.')
+    parser.add_argument('-splitNames', type=str, help='JSON file naming the splits of visdial data used as train,val,test')
+
 
     #-------------------------------------------------------------------------
     # Data input settings

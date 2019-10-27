@@ -286,7 +286,7 @@ def rankABot_category_specific_v2(aBot, dataset, split, categoryMappingFilename,
 
 
 
-def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, category, scoringFunction, exampleLimit=None):
+def rankABot_category_specific(aBot, dataset, split, category, categoryFiltering, scoringFunction, exampleLimit=None):
     '''
         Evaluate A-Bot performance on ranking answer option when it is
         shown ground truth image features, captions and questions.
@@ -312,9 +312,6 @@ def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, ca
 
     numBatches = (numExamples - 1) // batchSize + 1
 
-    # Load category specification
-    category_mapping = json.load(open(categoryMappingFilename,'r'))
-    category_mapping_split = category_mapping[split][category]
     skipped_batches = []
 
     original_split = dataset.split
@@ -322,7 +319,7 @@ def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, ca
     dataloader = DataLoader(
         dataset,
         batch_size=batchSize,
-        shuffle=False,
+        shuffle=True,
         num_workers=1,
         collate_fn=dataset.collate_fn)
 
@@ -331,7 +328,6 @@ def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, ca
     logProbsAll = [[] for _ in range(numRounds)]
     start_t = timer()
     for idx, batch in enumerate(dataloader):
-        #print("idx = ", idx)
         if idx == numBatches:
             break
 
@@ -359,7 +355,7 @@ def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, ca
         convId = Variable(batch['conv_id'], volatile=False)
 
         # Get conversation category mapping for the batch
-        category_mapping_conv = [category_mapping_split.get(str(batched_convId),[]) for batched_convId in convId.data]
+        category_mapping_conv = [categoryFiltering.get(str(batched_convId),[]) for batched_convId in convId.data]
         entire_batch_empty = True
         for category_rounds in category_mapping_conv:
             if len(category_rounds) > 0: entire_batch_empty = False
@@ -368,7 +364,6 @@ def rankABot_category_specific(aBot, dataset, split, categoryMappingFilename, ca
         aBot.reset()
         aBot.observe(-1, image=image, caption=caption, captionLens=captionLens)
         for round in range(numRounds):
-            #print("r = ", round)
             aBot.observe(
                 round,
                 ques=questions[:, round],
