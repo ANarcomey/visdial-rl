@@ -371,7 +371,7 @@ class VisDialDataset(Dataset):
             item['opt'] = opts.view(newSize)
             item['opt_len'] = optLens
 
-            if dtype != 'test':
+            if (dtype + '_ans_ind') in self.data:
                 ansId = self.data[dtype + '_ans_ind'][idx]
                 item['ans_id'] = ansId
 
