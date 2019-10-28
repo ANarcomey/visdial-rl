@@ -9,8 +9,8 @@ if [ "$1" == 'all_categories' ]
 then
 	echo "Training Answerer on all categories"
 	python train.py -trainMode sl-abot -useGPU \
-					-inputQues ../data/visdial_submodule/data/visdial_data.h5 \
-					-inputJson ../data/visdial_submodule/data/visdial_params.json \
+					-inputQues ../data/visdial_submodule/data/visdial_data_partition.h5 \
+					-inputJson ../data/visdial_submodule/data/visdial_params_partition.json \
 					-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
 					-cocoDir ../data/visdial_submodule/data/visdial_images \
 					-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
@@ -21,7 +21,9 @@ then
 					-enableVisdom 1 \
 					-visdomServerPort 8895 \
 					-visdomEnv all_categories_v3 \
-					-saveName all_categories_v3
+					-savePath checkpoints/all_categories \
+					-saveName all_categories_v3 \
+					-descr "Trained on all question categories."
 
 elif [ "$1" == 'binary' ]
 then
