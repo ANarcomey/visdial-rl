@@ -123,6 +123,25 @@ if [ "$1" == 'all_categories' ]; then
 		echo "Finally, choose \"eval_on_all_categories\" to evaluate on all data without any category filtering."
 	fi
 
+elif [ "$1" == 'predicate_debug' ]; then
+	python evaluate.py -useGPU -evalMode ABotRank \
+						-inputQues ../data/visdial_submodule/data/visdial_data_predicate_with_test_gt.h5 \
+						-inputJson ../data/visdial_submodule/data/visdial_params_predicate_with_test_gt.json \
+						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir ../data/visdial_submodule/data/visdial_images \
+						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-imgNorm 0 \
+						-imgFeatureSize 2048 \
+						-enableVisdom 1 \
+						-visdomServerPort 8895 \
+						-visdomEnv eval_$1_v3 \
+						-savePath checkpoints_eval/$1_v3 \
+						-saveName trained_$1_dialogwise_eval_$1_dialogwise \
+						-startFrom checkpoints_completed/$2 \
+						-descr "Trained on \"$1\" questions, filtered dialogwise. Evaluated on \"$1\" questions filtered dialogwise."
+
 else
 	echo "Evaluate Answerer trained on \"$1\" category. Checkpoint model from \"checkpoints_completed/$2\"."
 
@@ -133,8 +152,8 @@ else
 			echo "Evaluating on dialogs of all categories. No filtering."
 			if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 			python evaluate.py -useGPU -evalMode ABotRank \
-							-inputQues ../data/visdial_submodule/data/visdial_data_partition.h5 \
-							-inputJson ../data/visdial_submodule/data/visdial_params_partition.json \
+							-inputQues ../data/visdial_submodule/data/visdial_data_partition_predicate_vocab.h5 \
+							-inputJson ../data/visdial_submodule/data/visdial_params_partition_predicate_vocab.json \
 							-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
 							-cocoDir ../data/visdial_submodule/data/visdial_images \
 							-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
@@ -147,8 +166,12 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_dialogwise_eval_all \
+							-startFrom checkpoints_completed/$2 \
 							-descr "Trained on \"$1\" questions, filtered dialogwise. Evaluated on all categories" \
-							-startFrom checkpoints_completed/$2
+
+			#-inputQues ../data/visdial_submodule/data/visdial_data_partition.h5 \
+			#-inputJson ../data/visdial_submodule/data/visdial_params_partition.json \
+
 
 		elif [ "$4" == 'eval_on_category_turnwise' ]; then
 			echo "Evaluating on dialogs of category \"$1\". Dialogs filtered turnwise"
@@ -168,7 +191,7 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_dialogwise_eval_$1_turnwise \
-							-startFrom checkpoints/all_newfeats/abot_ep_50.vd \
+							-startFrom checkpoints_completed/$2 \
 							-descr "Trained on \"$1\" questions, filtered dialogwise. Evaluated on \"$1\" questions filtered turnwise."
 
 		elif [ "$4" == 'eval_on_category_dialogwise' ]; then
@@ -189,7 +212,7 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_dialogwise_eval_$1_dialogwise \
-							-startFrom checkpoints/all_newfeats/abot_ep_50.vd \
+							-startFrom checkpoints_completed/$2 \
 							-descr "Trained on \"$1\" questions, filtered dialogwise. Evaluated on \"$1\" questions filtered dialogwise."
 
 		elif [ "$4" == 'eval_all_modes' ]; then
@@ -202,7 +225,7 @@ else
 			echo "Alternatively, choose \"eval_all_modes\" for argument 4 to run all these modes at once."
 		fi
 
-	if [ "$3" == 'trained_turnwise' ]; then
+	elif [ "$3" == 'trained_turnwise' ]; then
 
 		echo "Evaluating Answerer trained on \"$1\" category, filtered turnwise"
 
@@ -224,8 +247,8 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_turnwise_eval_all \
-							-descr "Trained on \"$1\" questions, filtered turnwise. Evaluated on all categories" \
-							-startFrom checkpoints_completed/$2
+							-startFrom checkpoints_completed/$2 \
+							-descr "Trained on \"$1\" questions, filtered turnwise. Evaluated on all categories"
 
 		elif [ "$4" == 'eval_on_category_turnwise' ]; then
 
@@ -246,7 +269,7 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_dialogwise_eval_$1_turnwise \
-							-startFrom checkpoints/all_newfeats/abot_ep_50.vd \
+							-startFrom checkpoints_completed/$2 \
 							-descr "Trained on \"$1\" questions, filtered dialogwise. Evaluated on \"$1\" questions filtered turnwise."
 
 		elif [ "$4" == 'eval_on_category_dialogwise' ]; then
@@ -268,8 +291,9 @@ else
 							-visdomEnv eval_$1_v3 \
 							-savePath checkpoints_eval/$1_v3 \
 							-saveName trained_$1_turnwise_eval_$1_dialogwise \
-							-startFrom checkpoints/all_newfeats/abot_ep_50.vd \
+							-startFrom checkpoints_completed/$2 \
 							-descr "Trained on \"$1\" questions, filtered turnwise. Evaluated on \"$1\" questions filtered dialogwise."
+
 
 		elif [ "$4" == 'eval_all_modes' ]; then
 			./scripts/eval_answerers.sh $1 $2 trained_turnwise eval_on_all_categories no_wait
@@ -280,8 +304,7 @@ else
 			echo "Choose either \"eval_on_all_categories\", \"eval_on_category_turnwise\", or \"eval_on_category_dialogwise\" for argument 4."
 			echo "Alternatively, choose \"eval_all_modes\" for argument 4 to run all these modes at once."
 		fi
-
-
+	fi
 fi
 
 

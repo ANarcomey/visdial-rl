@@ -417,6 +417,7 @@ then
 						-cocoDir ../data/visdial_submodule/data/visdial_images \
 						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
 						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
 						-enableVisdom 1 \

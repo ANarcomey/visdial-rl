@@ -19,7 +19,7 @@ import options
 from dataloader import VisDialDataset
 from torch.utils.data import DataLoader
 from eval_utils.dialog_generate import dialogDump
-from eval_utils.rank_answerer import rankABot, rankABot_category_specific, rankABot_category_specific_batchless
+from eval_utils.rank_answerer import rankABot, rankABot_category_specific
 from eval_utils.rank_questioner import rankQBot, rankQABots
 from utils import utilities as utils
 from utils.visualize import VisdomVisualize
@@ -39,7 +39,7 @@ dlparams = params.copy()
 dlparams['useIm'] = True
 dlparams['useHistory'] = True
 dlparams['numRounds'] = 10
-splits = ['val']#['val', 'test']
+splits = ['val','test']
 
 dataset = VisDialDataset(dlparams, splits)
 
@@ -84,7 +84,6 @@ excludeParams = ['batchSize', 'visdomEnv', 'startFrom', 'qstartFrom', 'trainMode
 
 aBot = None
 qBot = None
-#import pdb;pdb.set_trace()
 
 # load aBot
 if params['startFrom']:
@@ -138,15 +137,10 @@ if 'ckpt_iterid' in params:
 else:
     iterId = -1
 
-#if 'test' in splits:
-#    split = 'test'
-#    splitName = 'test - {}'.format(params['evalTitle'])
-#else:
-#    split = 'val'
-#    splitName = 'full Val - {}'.format(params['evalTitle'])
-
-
 for split in splits:
+    if split == 'train': splitName = 'full train - {}'.format(params['evalTitle'])
+    if split == 'val': splitName = 'full Val - {}'.format(params['evalTitle'])
+    if split == 'test': splitName = 'test - {}'.format(params['evalTitle'])
 
     logging.info("Using split %s" % split)
     dataset.split = split
