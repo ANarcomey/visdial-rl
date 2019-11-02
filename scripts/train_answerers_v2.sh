@@ -5,7 +5,7 @@ wait_for_approval() {
         read  -n 1 -p "Enter [y] to confirm and proceed. Any other character to exit: " confirmation
         echo ""
         if [ $confirmation == "y" ]; then
-                echo "Proceeding with evaluation:"
+                echo "Proceeding with training:"
                 echo ""
         else
                 exit 0
