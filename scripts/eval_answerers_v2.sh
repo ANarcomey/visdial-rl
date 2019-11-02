@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: `./scripts/eval_answerers.sh <trained mode> <params>....`
+# Usage: `./scripts/eval_answerers_v2.sh <trained mode> <params>....`
 
 wait_for_approval() {
         read  -n 1 -p "Enter [y] to confirm and proceed. Any other character to exit: " confirmation
@@ -58,38 +58,38 @@ if [ "$1" == 'trained_all_categories' ]; then
 						-descr "Trained on all categories. Evaluated on $3 filtered dialogwise."
 
 	elif [ "$2" == 'eval_on_each_category_turnwise' ]; then
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise binary $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise color $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise count $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise object $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise attribute $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise predicate $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise location $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise time $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise animal $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise spatial $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise material $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise food $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise activity $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise stuff $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_turnwise shape $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise binary $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise color $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise count $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise object $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise attribute $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise predicate $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise location $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise time $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise animal $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise spatial $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise material $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise food $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise activity $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise stuff $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_turnwise shape $4 no_wait
 
 	elif [ "$2" == 'eval_on_each_category_dialogwise' ]; then
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise binary $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise color $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise count $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise object $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise attribute $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise predicate $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise location $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise time $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise animal $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise spatial $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise material $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise food $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise activity $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise stuff $4 no_wait
-		./scripts/eval_answerers.sh trained_all_categories eval_on_category_dialogwise shape $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise binary $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise color $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise count $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise object $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise attribute $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise predicate $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise location $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise time $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise animal $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise spatial $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise material $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise food $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise activity $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise stuff $4 no_wait
+		./scripts/eval_answerers_v2.sh trained_all_categories eval_on_category_dialogwise shape $4 no_wait
 
 	elif [ "$2" == 'eval_on_all_categories' ]; then
 
@@ -192,9 +192,9 @@ elif [ "$1" == 'trained_category_dialogwise' ]; then
 						-descr "Trained on \"$2\" questions, filtered dialogwise. Evaluated on \"$2\" questions filtered dialogwise."
 
 	elif [ "$4" == 'eval_all_modes' ]; then
-		./scripts/eval_answerers.sh trained_category_dialogwise $2 $3 eval_on_all_categories no_wait
-		./scripts/eval_answerers.sh trained_category_dialogwise $2 $3 eval_on_category_turnwise no_wait
-		./scripts/eval_answerers.sh trained_category_dialogwise $2 $3 eval_on_category_dialogwise no_wait
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise $2 $3 eval_on_all_categories no_wait
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise $2 $3 eval_on_category_turnwise no_wait
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise $2 $3 eval_on_category_dialogwise no_wait
 	else
 		echo "Choose either \"eval_on_all_categories\", \"eval_on_category_turnwise\", or \"eval_on_category_dialogwise\" for argument 4."
 		echo "Alternatively, choose \"eval_all_modes\" for argument 4 to run all these modes at once."
@@ -270,9 +270,9 @@ elif [ "$1" == 'trained_category_turnwise' ]; then
 
 
 	elif [ "$4" == 'eval_all_modes' ]; then
-		./scripts/eval_answerers.sh trained_category_turnwise $2 $3 eval_on_all_categories no_wait
-		./scripts/eval_answerers.sh trained_category_turnwise $2 $3 eval_on_category_turnwise no_wait
-		./scripts/eval_answerers.sh trained_category_turnwise $2 $3 eval_on_category_dialogwise no_wait
+		./scripts/eval_answerers_v2.sh trained_category_turnwise $2 $3 eval_on_all_categories no_wait
+		./scripts/eval_answerers_v2.sh trained_category_turnwise $2 $3 eval_on_category_turnwise no_wait
+		./scripts/eval_answerers_v2.sh trained_category_turnwise $2 $3 eval_on_category_dialogwise no_wait
 
 	else
 		echo "Choose either \"eval_on_all_categories\", \"eval_on_category_turnwise\", or \"eval_on_category_dialogwise\" for argument 4."
