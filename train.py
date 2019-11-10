@@ -40,7 +40,10 @@ if params['useGPU']:
     torch.cuda.manual_seed_all(params['randomSeed'])
 
 # Setup dataloader
-splits = ['train', 'val', 'test']
+if params['noTestSet']:
+    splits = ['train','val']
+else:
+    splits = ['train', 'val', 'test']
 dataset = VisDialDataset(params, splits)
 
 # Params to transfer from dataset
@@ -81,7 +84,7 @@ metrics_by_epoch = {}
 parameters = []
 aBot = None
 qBot = None
-
+import pdb;pdb.set_trace()
 # Loading A-Bot
 if params['trainMode'] in ['sl-abot', 'rl-full-QAf']:
     aBot, loadedParams, optim_state = utils.loadModel(params, 'abot')

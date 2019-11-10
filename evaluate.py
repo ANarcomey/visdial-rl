@@ -39,8 +39,11 @@ dlparams = params.copy()
 dlparams['useIm'] = True
 dlparams['useHistory'] = True
 dlparams['numRounds'] = 10
-splits = ['val','test']
 
+if params['noTestSet']:
+    splits = ['val']
+else:
+    splits = ['val', 'test']
 dataset = VisDialDataset(dlparams, splits)
 
 # Transferring dataset parameters
