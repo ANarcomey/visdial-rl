@@ -19,17 +19,18 @@ if [ "$1" == 'trained_all_categories' ]; then
 		echo "Evaluating Answerer on category \"$3\". Dialogs filtered turnwise. Checkpoint model from \"$4\""
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_all_categories.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_all_categories.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$3/data_vocab_from_all_categories.h5  \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$3/params_vocab_from_all_categories.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $3 \
 						-visdomEnv eval_all_v3 \
 						-savePath checkpoints_eval/all_categories_v3 \
 						-saveName trained_all_eval_$3_turnwise \
@@ -40,17 +41,18 @@ if [ "$1" == 'trained_all_categories' ]; then
 		echo "Evaluating Answerer on category \"$3\". Dialogs filtered dialogwise. Checkpoint model from \"$4\""
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$3/data_vocab_from_all_categories.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$3/params_vocab_from_all_categories.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$3/data_vocab_from_all_categories.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$3/params_vocab_from_all_categories.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $3 \
 						-visdomEnv eval_all_v3 \
 						-savePath checkpoints_eval/all_categories_v3 \
 						-saveName trained_all_eval_$3_dialogwise \
@@ -95,18 +97,18 @@ if [ "$1" == 'trained_all_categories' ]; then
 
 		echo "Evaluating Answerer on complete dataset, all categories. Checkpoint model from \"$3\""
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_all_categories.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_all_categories.json \
-						-inputQues ../data/visdial_submodule/data/visdial_data_partition.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_params_partition.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_all_categories.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_all_categories.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_data_partition.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_params_partition.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
 						-visdomEnv eval_all_v3 \
 						-savePath checkpoints_eval/all_categories_v3 \
@@ -128,16 +130,16 @@ elif [ "$1" == 'trained_category_dialogwise' ]; then
 		echo "Evaluating on dialogs of all categories. No filtering."
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_$2_dialogwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_$2_dialogwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_$2_dialogwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_$2_dialogwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
@@ -145,25 +147,23 @@ elif [ "$1" == 'trained_category_dialogwise' ]; then
 						-startFrom $3 \
 						-descr "Trained on \"$2\" questions, filtered dialogwise. Evaluated on all categories" \
 
-		#-inputQues ../data/visdial_submodule/data/visdial_data_partition.h5 \
-		#-inputJson ../data/visdial_submodule/data/visdial_params_partition.json \
-
 
 	elif [ "$4" == 'eval_on_category_turnwise' ]; then
 		echo "Evaluating on dialogs of category \"$2\". Dialogs filtered turnwise"
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_category_turnwise/$2/data_vocab_from_$2_dialogwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_category_turnwise/$2/params_vocab_from_$2_dialogwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$2/data_vocab_from_$2_dialogwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$2/params_vocab_from_$2_dialogwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $2 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
 						-saveName trained_$2_dialogwise_eval_$2_turnwise \
@@ -174,17 +174,18 @@ elif [ "$1" == 'trained_category_dialogwise' ]; then
 		echo "Evaluating on dialogs of category \"$2\". Dialogs filtered dialogwise"
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$2/data_vocab_from_$2_dialogwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$2/params_vocab_from_$2_dialogwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$2/data_vocab_from_$2_dialogwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$2/params_vocab_from_$2_dialogwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $2 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
 						-saveName trained_$2_dialogwise_eval_$2_dialogwise \
@@ -207,16 +208,16 @@ elif [ "$1" == 'trained_category_turnwise' ]; then
 		echo "Evaluating on dialogs of all categories. No filtering."
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_$2_turnwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_$2_turnwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/data_vocab_from_$2_turnwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_all_categories/params_vocab_from_$2_turnwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
@@ -229,17 +230,18 @@ elif [ "$1" == 'trained_category_turnwise' ]; then
 		echo "Evaluating on dialogs of category \"$2\". Dialogs filtered turnwise"
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_category_turnwise/$2/data_vocab_from_$2_turnwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_category_turnwise/$2/params_vocab_from_$2_turnwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$2/data_vocab_from_$2_turnwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_turnwise_v2/$2/params_vocab_from_$2_turnwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $2 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
 						-saveName trained_$2_turnwise_eval_$2_turnwise \
@@ -251,17 +253,18 @@ elif [ "$1" == 'trained_category_turnwise' ]; then
 		echo "Evaluating on dialogs of category \"$2\". Dialogs filtered dialogwise"
 		if [ "$5" != "no_wait" ]; then wait_for_approval; fi
 		python evaluate.py -useGPU -evalMode ABotRank \
-						-inputQues ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$2/data_vocab_from_$2_turnwise.h5 \
-						-inputJson ../data/visdial_submodule/data/visdial_partition_category_dialogwise/$2/params_vocab_from_$2_turnwise.json \
-						-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-						-cocoDir ../data/visdial_submodule/data/visdial_images \
-						-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-						-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-						-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+						-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$2/data_vocab_from_$2_turnwise.h5 \
+						-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_partition_category_dialogwise_v2/$2/params_vocab_from_$2_turnwise.json \
+						-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+						-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+						-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+						-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+						-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 						-imgNorm 0 \
 						-imgFeatureSize 2048 \
-						-enableVisdom 1 \
+						-enableVisdom 0 \
 						-visdomServerPort 8895 \
+						-qaCategory $2 \
 						-visdomEnv eval_$2_v3 \
 						-savePath checkpoints_eval/$2_v3 \
 						-saveName trained_$2_turnwise_eval_$2_dialogwise \
@@ -286,22 +289,40 @@ elif [ "$1" == 'custom_scripts' ]; then
 	if [ "$2" == 'predicate_debug' ]; then
 		echo "Running custom script for predicate_debug"
 		python evaluate.py -useGPU -evalMode ABotRank \
-							-inputQues ../data/visdial_submodule/data/visdial_data_predicate_with_test_gt.h5 \
-							-inputJson ../data/visdial_submodule/data/visdial_params_predicate_with_test_gt.json \
-							-inputImg ../data/visdial_submodule/data/image_feats_res101_partition.h5 \
-							-cocoDir ../data/visdial_submodule/data/visdial_images \
-							-cocoInfo ../data/visdial_submodule/data/visdial_images/coco_info.json \
-							-categoryMap ../data/visdial_submodule/data/qa_category_mapping.json  \
-							-splitNames ../data/visdial_submodule/data/partition_split_names.json \
+							-inputQues /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_data_predicate_with_test_gt.h5 \
+							-inputJson /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_params_predicate_with_test_gt.json \
+							-inputImg /vision2/u/anarc/motm/data/visdial_submodule/data/image_feats_res101_partition.h5 \
+							-cocoDir /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images \
+							-cocoInfo /vision2/u/anarc/motm/data/visdial_submodule/data/visdial_images/coco_info.json \
+							-categoryMap /vision2/u/anarc/motm/data/visdial_submodule/data/qa_category_mapping.json  \
+							-splitNames /vision2/u/anarc/motm/data/visdial_submodule/data/partition_split_names.json \
 							-imgNorm 0 \
 							-imgFeatureSize 2048 \
-							-enableVisdom 1 \
+							-enableVisdom 0 \
 							-visdomServerPort 8895 \
 							-visdomEnv eval_$2_v3 \
 							-savePath checkpoints_eval/$2_v3 \
 							-saveName trained_$2_dialogwise_eval_$2_dialogwise \
 							-startFrom checkpoints_completed/$3 \
 							-descr "Trained on \"$2\" questions, filtered dialogwise. Evaluated on \"$2\" questions filtered dialogwise."
+
+	elif [ "$2" == 'eval_chunk1' ]; then
+		echo "eval chunk 1"
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise color /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/object/color_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise object /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/object/object_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise attribute /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/attribute/attribute_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise predicate /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/predicate/predicate_v3_dialogwise/abot_ep_64.vd eval_all_modes
+
+	elif [ "$2" == 'eval_chunk2' ]; then
+		echo "eval chunk 2"
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise location /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/location/location_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise time /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/time/time_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise animal /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/animal/animal_v3_dialogwise/abot_ep_64.vd eval_all_modes
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise spatial /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/spatial/spatial_v3_dialogwise/abot_ep_64.vd eval_all_modes
+
+	elif [ "$2" == 'count' ]; then
+		./scripts/eval_answerers_v2.sh trained_category_dialogwise count /vision2/u/anarc/motm/visdial-rl_submodule/checkpoints_completed/count/count_v3_dialogwise/abot_ep_64.vd eval_all_modes
+
 	fi
 	echo "Returning."
 

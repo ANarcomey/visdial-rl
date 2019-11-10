@@ -152,12 +152,11 @@ for split in splits:
     if 'ABotRank' in params['evalModeList']:
         #print("Performing ABotRank evaluation")
         logging.info("Performing ABotRank evaluation on split {}".format(split))
-
         if params['qaCategory'] and params['categoryMap']:
             logging.info("Evaluating only on rounds in the category \"{}\"".format(params['qaCategory']))
             rankMetrics_category = rankABot_category_specific(
-                aBot, dataset, split, utils.maskedNll, params['qaCategory'], params['categoryMap'], category_mapping_splits[split])
-            #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+                aBot, dataset, split, params['qaCategory'], category_mapping_splits[split], scoringFunction=utils.maskedNll, exampleLimit=None)
+
             for metric, value in rankMetrics_category.items():
                 plotName = splitName + ' - ABot Rank'
                 viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
@@ -166,7 +165,7 @@ for split in splits:
             logging.info("Evaluating on complete dataset, no category specification")
             rankMetrics = rankABot(
                 aBot, dataset, split, scoringFunction=utils.maskedNll)
-            #{'r1': 36.24515503875969, 'r5': 55.58139534883721, 'r10': 61.593992248062015, 'mean': 20.01468023255814, 'mrr': 0.4615877921180981, 'logProbsMean': 8.633932}
+
             for metric, value in rankMetrics.items():
                 plotName = splitName + ' - ABot Rank'
                 viz.linePlot(iterId, value, plotName, metric, xlabel='Iterations')
